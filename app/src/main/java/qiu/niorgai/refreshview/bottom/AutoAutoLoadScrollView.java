@@ -1,4 +1,4 @@
-package qiu.niorgai.refreshview;
+package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -8,22 +8,22 @@ import android.widget.ScrollView;
 /**
  * Created by qiu on 9/20/15.
  */
-public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.LoadMoreComplete{
+public class AutoAutoLoadScrollView extends ScrollView implements Interface.AutoLoadView {
 
     //是否正在加载
     private boolean isLoadingMore = false;
     //    是否有更多
     private boolean isHaveMore = true;
 
-    private LoadMoreInterface.LoadMoreListener loadMoreListener;
+    private Interface.LoadMoreListener loadMoreListener;
 
     private BottomLoadingView mLoadingView;
 
-    public AutoLoadScrollView(Context context) {
+    public AutoAutoLoadScrollView(Context context) {
         this(context, null);
     }
 
-    public AutoLoadScrollView(Context context, AttributeSet attrs) {
+    public AutoAutoLoadScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLoadingView = new BottomLoadingView(context);
     }
@@ -109,7 +109,7 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
     }
 
     @Override
-    public void setLoadMoreListener(LoadMoreInterface.LoadMoreListener loadMoreListener) {
+    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
         this.loadMoreListener = loadMoreListener;
     }
 

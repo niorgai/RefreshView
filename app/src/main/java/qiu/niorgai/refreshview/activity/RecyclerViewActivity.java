@@ -12,14 +12,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import qiu.niorgai.refreshview.AutoLoadRecyclerView;
-import qiu.niorgai.refreshview.LoadMoreInterface;
+import qiu.niorgai.refreshview.bottom.AutoAutoLoadRecyclerView;
+import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.RecyclerAdapter;
+import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class RecyclerViewActivity extends AppCompatActivity implements LoadMoreInterface.LoadMoreListener {
+public class RecyclerViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
 
-    private AutoLoadRecyclerView recyclerView;
+    private SuperRefreshLayout refreshLayout;
+
+    private AutoAutoLoadRecyclerView recyclerView;
 
     private RecyclerAdapter mAdapter;
 
@@ -43,18 +46,38 @@ public class RecyclerViewActivity extends AppCompatActivity implements LoadMoreI
             }
         });
 
-        recyclerView = (AutoLoadRecyclerView) findViewById(R.id.recycler_view);
+        recyclerView = (AutoAutoLoadRecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLoadMoreListener(this);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
         data = new ArrayList<>();
-        for (int i=0; i<30; i++) {
-            data.add("");
-        }
 
         mAdapter = new RecyclerAdapter(this, data);
         recyclerView.setAdapter(mAdapter);
-        recyclerView.setIsHaveMore(true);
+
+        refreshLayout = (SuperRefreshLayout) findViewById(R.id.refresh_layout);
+        refreshLayout.setOnRefreshListener(new SuperRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(RecyclerViewActivity.this, "start refresh", Toast.LENGTH_SHORT).show();
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(RecyclerViewActivity.this, "refresh finish", Toast.LENGTH_SHORT).show();
+                        refreshLayout.setRefreshing(false);
+
+                        //add data
+                        data.clear();
+                        for (int i=0; i<10; i++) {
+                            data.add("");
+                        }
+                        mAdapter.notifyDataSetChanged();
+                        //more data
+                        recyclerView.setIsHaveMore(true);
+                    }
+                }, 3000);
+            }
+        });
     }
 
     @Override

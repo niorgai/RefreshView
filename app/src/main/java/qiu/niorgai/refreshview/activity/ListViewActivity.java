@@ -11,14 +11,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import qiu.niorgai.refreshview.AutoLoadListView;
-import qiu.niorgai.refreshview.LoadMoreInterface;
+import qiu.niorgai.refreshview.bottom.AutoAutoLoadListView;
+import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.ListAdapter;
+import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class ListViewActivity extends AppCompatActivity implements LoadMoreInterface.LoadMoreListener {
+public class ListViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
 
-    private AutoLoadListView listView;
+    private SuperRefreshLayout refreshLayout;
+
+    private AutoAutoLoadListView listView;
 
     private ListAdapter mAdapter;
 
@@ -42,17 +45,38 @@ public class ListViewActivity extends AppCompatActivity implements LoadMoreInter
             }
         });
 
-        listView = (AutoLoadListView) findViewById(R.id.list_view);
+        listView = (AutoAutoLoadListView) findViewById(R.id.list_view);
         listView.setLoadMoreListener(this);
 
         data = new ArrayList<>();
-        for (int i=0; i<10; i++) {
-            data.add("");
-        }
 
         mAdapter = new ListAdapter(this, data);
         listView.setAdapter(mAdapter);
-        listView.setIsHaveMore(true);
+        listView.setEmptyView(findViewById(R.id.empty_view));
+
+        refreshLayout = (SuperRefreshLayout) findViewById(R.id.refresh_layout);
+        refreshLayout.setOnRefreshListener(new SuperRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(ListViewActivity.this, "start refresh", Toast.LENGTH_SHORT).show();
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ListViewActivity.this, "refresh finish", Toast.LENGTH_SHORT).show();
+                        refreshLayout.setRefreshing(false);
+
+                        //add data
+                        data.clear();
+                        for (int i=0; i<10; i++) {
+                            data.add("");
+                        }
+                        mAdapter.notifyDataSetChanged();
+                        //more data
+                        listView.setIsHaveMore(true);
+                    }
+                }, 3000);
+            }
+        });
     }
 
     @Override

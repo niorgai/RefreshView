@@ -1,4 +1,4 @@
-package qiu.niorgai.refreshview;
+package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterface.LoadMoreComplete{
+public class AutoAutoLoadRecyclerView extends RecyclerView implements Interface.AutoLoadView {
 
     //是否向下滑动
     private boolean isScrollingDown = false;
@@ -31,17 +31,17 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
 
     private boolean isHasMore = false;
 
-    private LoadMoreInterface.LoadMoreListener loadMoreListener;
+    private Interface.LoadMoreListener loadMoreListener;
 
-    public AutoLoadRecyclerView(Context context) {
+    public AutoAutoLoadRecyclerView(Context context) {
         this(context, null);
     }
 
-    public AutoLoadRecyclerView(Context context, AttributeSet attrs) {
+    public AutoAutoLoadRecyclerView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AutoLoadRecyclerView(Context context, AttributeSet attrs, int defStyle) {
+    public AutoAutoLoadRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
@@ -159,7 +159,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     }
 
     @Override
-    public void setLoadMoreListener(LoadMoreInterface.LoadMoreListener loadMoreListener) {
+    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
         this.loadMoreListener = loadMoreListener;
     }
 

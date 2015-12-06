@@ -9,13 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import qiu.niorgai.refreshview.AutoLoadScrollView;
-import qiu.niorgai.refreshview.LoadMoreInterface;
+import qiu.niorgai.refreshview.bottom.AutoAutoLoadScrollView;
+import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
+import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class ScrollViewActivity extends AppCompatActivity implements LoadMoreInterface.LoadMoreListener {
+public class ScrollViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
 
-    private AutoLoadScrollView scrollView;
+    private SuperRefreshLayout refreshLayout;
+
+    private AutoAutoLoadScrollView scrollView;
 
     private View content;
 
@@ -37,11 +40,33 @@ public class ScrollViewActivity extends AppCompatActivity implements LoadMoreInt
             }
         });
 
-        scrollView = (AutoLoadScrollView) findViewById(R.id.scroll_view);
+        scrollView = (AutoAutoLoadScrollView) findViewById(R.id.scroll_view);
         content = findViewById(R.id.content);
 
         scrollView.setLoadMoreListener(this);
-        scrollView.setIsHaveMore(true);
+
+        refreshLayout = (SuperRefreshLayout) findViewById(R.id.refresh_layout);
+        refreshLayout.setOnRefreshListener(new SuperRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(ScrollViewActivity.this, "start refresh", Toast.LENGTH_SHORT).show();
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ScrollViewActivity.this, "refresh finish", Toast.LENGTH_SHORT).show();
+                        refreshLayout.setRefreshing(false);
+
+                        //add data
+                        ViewGroup.LayoutParams params = content.getLayoutParams();
+                        params.height = (int) (getResources().getDisplayMetrics().density * 300);
+                        content.setLayoutParams(params);
+
+                        //more data
+                        scrollView.setIsHaveMore(true);
+                    }
+                }, 3000);
+            }
+        });
     }
 
     @Override

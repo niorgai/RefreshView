@@ -1,4 +1,4 @@
-package qiu.niorgai.refreshview;
+package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -11,7 +11,7 @@ import android.widget.TextView;
 /**
  * Created by qiu on 9/20/15.
  */
-public class BottomLoadingView extends LinearLayout implements LoadMoreInterface.BottomLoadingViewInterface {
+public class BottomLoadingView extends LinearLayout {
 
     private TextView textView;
 
@@ -29,7 +29,7 @@ public class BottomLoadingView extends LinearLayout implements LoadMoreInterface
         textView.setLayoutParams(params);
     }
 
-    public void changeToClickStatus(final LoadMoreInterface.LoadMoreListener loadMoreListener) {
+    public void changeToClickStatus(final Interface.LoadMoreListener loadMoreListener) {
         setVisibility(VISIBLE);
         textView.setText("click to load");
         if (loadMoreListener != null) {

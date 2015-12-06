@@ -1,4 +1,4 @@
-package qiu.niorgai.refreshview;
+package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -14,7 +14,7 @@ import android.widget.ListView;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoLoadListView extends ListView implements AbsListView.OnScrollListener, LoadMoreInterface.LoadMoreComplete {
+public class AutoAutoLoadListView extends ListView implements AbsListView.OnScrollListener, Interface.AutoLoadView {
 
     private Context mContext;
 
@@ -35,13 +35,13 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     //TYPE_NORMAL为普通item,由adapter控制
     private static final int TYPE_NORMAL = -2;
 
-    private LoadMoreInterface.LoadMoreListener loadMoreListener;
+    private Interface.LoadMoreListener loadMoreListener;
 
-    public AutoLoadListView(Context context) {
+    public AutoAutoLoadListView(Context context) {
         this(context, null);
     }
 
-    public AutoLoadListView(Context context, AttributeSet attrs) {
+    public AutoAutoLoadListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         setOnScrollListener(this);
@@ -117,7 +117,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     }
 
     @Override
-    public void setLoadMoreListener(LoadMoreInterface.LoadMoreListener loadMoreListener) {
+    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
         this.loadMoreListener = loadMoreListener;
     }
 
