@@ -85,7 +85,7 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
             }
             int scrollViewHeight = getMeasuredHeight();
             int childViewHeight = group.getMeasuredHeight();
-            if (scrollViewHeight == childViewHeight) {
+            if (scrollViewHeight >= childViewHeight) {
                 //此时未填满屏幕
                 mLoadingView.changeToClickStatus(loadMoreListener);
             } else {

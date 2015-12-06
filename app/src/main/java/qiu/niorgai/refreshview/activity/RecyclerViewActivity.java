@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
@@ -45,10 +45,10 @@ public class RecyclerViewActivity extends AppCompatActivity implements LoadMoreI
 
         recyclerView = (AutoLoadRecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLoadMoreListener(this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
         data = new ArrayList<>();
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<30; i++) {
             data.add("");
         }
 
@@ -64,12 +64,15 @@ public class RecyclerViewActivity extends AppCompatActivity implements LoadMoreI
             @Override
             public void run() {
                 Toast.makeText(RecyclerViewActivity.this, "load more finish", Toast.LENGTH_SHORT).show();
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 30; i++) {
                     data.add("");
                 }
                 mAdapter.notifyDataSetChanged();
+
                 count++;
-                recyclerView.setIsHaveMore(count != 3);
+                recyclerView.onComplete(count != 4);
+//                or load Error
+//                recyclerView.onError();
             }
         }, 3000);
     }

@@ -43,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, RecyclerViewActivity.class));
             }
         });
+
+        findViewById(R.id.scroll_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, ScrollViewActivity.class));
+            }
+        });
     }
 
     @Override

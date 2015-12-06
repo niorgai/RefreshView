@@ -6,30 +6,25 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import qiu.niorgai.refreshview.AutoLoadListView;
+import qiu.niorgai.refreshview.AutoLoadScrollView;
 import qiu.niorgai.refreshview.LoadMoreInterface;
 import qiu.niorgai.refreshview.R;
-import qiu.niorgai.refreshview.adapter.ListAdapter;
 
-public class ListViewActivity extends AppCompatActivity implements LoadMoreInterface.LoadMoreListener {
+public class ScrollViewActivity extends AppCompatActivity implements LoadMoreInterface.LoadMoreListener {
 
-    private AutoLoadListView listView;
+    private AutoLoadScrollView scrollView;
 
-    private ListAdapter mAdapter;
+    private View content;
 
-    private List<String> data;
-
-    private int count = 0;
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_view);
+        setContentView(R.layout.activity_scroll_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -42,35 +37,30 @@ public class ListViewActivity extends AppCompatActivity implements LoadMoreInter
             }
         });
 
-        listView = (AutoLoadListView) findViewById(R.id.list_view);
-        listView.setLoadMoreListener(this);
+        scrollView = (AutoLoadScrollView) findViewById(R.id.scroll_view);
+        content = findViewById(R.id.content);
 
-        data = new ArrayList<>();
-        for (int i=0; i<10; i++) {
-            data.add("");
-        }
-
-        mAdapter = new ListAdapter(this, data);
-        listView.setAdapter(mAdapter);
-        listView.setIsHaveMore(true);
+        scrollView.setLoadMoreListener(this);
+        scrollView.setIsHaveMore(true);
     }
 
     @Override
     public void loadMore() {
         Toast.makeText(this, "start loading more", Toast.LENGTH_SHORT).show();
-        listView.postDelayed(new Runnable() {
+        scrollView.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(ListViewActivity.this, "load more finish", Toast.LENGTH_SHORT).show();
-                for (int i=0; i<10; i++) {
-                    data.add("");
-                }
-                mAdapter.notifyDataSetChanged();
-                count ++;
+                Toast.makeText(ScrollViewActivity.this, "load more finish", Toast.LENGTH_SHORT).show();
 
-                listView.setIsHaveMore(count != 4);
+                ViewGroup.LayoutParams params = content.getLayoutParams();
+                params.height += 600;
+                content.setLayoutParams(params);
+
+                count++;
+
+                scrollView.onComplete(count != 4);
 //                or Error
-//                listView.onError();
+//                scrollView.onError();
             }
         }, 3000);
     }
