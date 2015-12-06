@@ -1,4 +1,4 @@
-package qiu.niorgai.library;
+package qiu.niorgai.refreshview;
 
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
@@ -27,7 +27,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     //Wrapper模式,为adapter再封装一层,同时加入FooterView
     private WrapAdapter mWrapAdapter;
 
-    private LoadMoreInterface.BottomLoadingView mLoadingView;
+    private BottomLoadingView mLoadingView;
 
     private boolean isHasMore = false;
 
@@ -47,8 +47,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     }
 
     private void init(Context context) {
-        //TODO:: empty
-//        mLoadingView = new LoadingView(context);
+        mLoadingView = new BottomLoadingView(context);
         this.setOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -150,9 +149,9 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
 
     @Override
     public void onError() {
-         isLoadingMore = false;
-         mLoadingView.changeToClickStatus(loadMoreListener);
-     }
+        isLoadingMore = false;
+        mLoadingView.changeToClickStatus(loadMoreListener);
+    }
 
     @Override
     public void setIsHaveMore(boolean isHasMore) {
@@ -208,7 +207,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_FOOTER) {
-                return new FooterViewHolder((View) mLoadingView);
+                return new FooterViewHolder(mLoadingView);
             }
             return mAdapter.onCreateViewHolder(parent, viewType);
         }
@@ -224,7 +223,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
                         mLoadingView.changeToClickStatus(loadMoreListener);
                     }
                 } else {
-                    if (lastPosition > childCount) {
+                    if (isHasMore) {
                         mLoadingView.changeToLoadingStatus();
                     }
                 }

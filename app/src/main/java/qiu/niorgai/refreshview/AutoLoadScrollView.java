@@ -1,8 +1,7 @@
-package qiu.niorgai.library;
+package qiu.niorgai.refreshview;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 
@@ -13,12 +12,12 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
 
     //是否正在加载
     private boolean isLoadingMore = false;
-//    是否有更多
+    //    是否有更多
     private boolean isHaveMore = true;
 
     private LoadMoreInterface.LoadMoreListener loadMoreListener;
 
-    private LoadMoreInterface.BottomLoadingView mLoadingView;
+    private BottomLoadingView mLoadingView;
 
     public AutoLoadScrollView(Context context) {
         this(context, null);
@@ -26,8 +25,7 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
 
     public AutoLoadScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //TODO::empty
-//        mLoadingView = new LoadingView(context);
+        mLoadingView = new BottomLoadingView(context);
     }
 
     @Override
@@ -45,11 +43,11 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
             int childViewHeight = group.getMeasuredHeight();
             if (scrollViewHeight == childViewHeight) {
                 //此时未填满屏幕
-                group.addView((View) mLoadingView, group.getChildCount());
+                group.addView(mLoadingView, group.getChildCount());
                 mLoadingView.changeToClickStatus(loadMoreListener);
             } else {
                 //填满屏幕了
-                group.addView((View) mLoadingView, group.getChildCount());
+                group.addView(mLoadingView, group.getChildCount());
                 mLoadingView.changeToLoadingStatus();
             }
         }
@@ -61,9 +59,9 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
         //需要监听滑动
         if (isHaveMore && !isLoadingMore && loadMoreListener != null) {
             if (t > oldt) {
-            //正在向下滑动
-            if (t + getHeight() >= computeVerticalScrollRange() - ((View) mLoadingView).getMeasuredHeight() / 2) {
-                //已经滑动到底部
+                //正在向下滑动
+                if (t + getHeight() >= computeVerticalScrollRange() - mLoadingView.getMeasuredHeight() / 2) {
+                    //已经滑动到底部
                     loadMoreListener.loadMore();
                     isLoadingMore = true;
                     mLoadingView.changeToLoadingStatus();

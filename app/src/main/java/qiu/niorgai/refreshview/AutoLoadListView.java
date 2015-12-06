@@ -1,4 +1,4 @@
-package qiu.niorgai.library;
+package qiu.niorgai.refreshview;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -28,7 +28,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     private boolean isHaveMore = false;
 
-    private LoadMoreInterface.BottomLoadingView mLoadingView;
+    private BottomLoadingView mLoadingView;
 
     //TYPE_FOOTER为FooterView
     private static final int TYPE_FOOTER = -1;
@@ -50,7 +50,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-    //没有正在加载 && 向下滑动 && 最后一个item可见
+        //没有正在加载 && 向下滑动 && 最后一个item可见
         if (isHaveMore && !isLoadingMore && isScrollingDown && isLastItemVisible) {
             if (loadMoreListener != null) {
                 loadMoreListener.loadMore();
@@ -201,11 +201,10 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
         public View getView(int position, View convertView, ViewGroup parent) {
             if (getItemViewType(position) == TYPE_FOOTER) {
                 if (convertView == null) {
-                    //TODO::empty
-//                    convertView = new LoadingView(mContext);
+                    convertView = new BottomLoadingView(mContext);
                     convertView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 }
-                mLoadingView = (LoadMoreInterface.BottomLoadingView) convertView;
+                mLoadingView = (BottomLoadingView) convertView;
                 int childViewCount = getChildCount();
                 int allCount = getCount();
                 if (childViewCount == allCount - 1 && isHaveMore) {

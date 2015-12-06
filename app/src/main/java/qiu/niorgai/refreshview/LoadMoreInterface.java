@@ -1,4 +1,4 @@
-package qiu.niorgai.library;
+package qiu.niorgai.refreshview;
 
 /**
  * Created by qiu on 9/18/15.
@@ -19,7 +19,7 @@ public class LoadMoreInterface {
         void setLoadMoreListener(LoadMoreListener listener);
     }
 
-    public interface BottomLoadingView {
+    public interface BottomLoadingViewInterface {
         void changeToClickStatus(LoadMoreInterface.LoadMoreListener loadMoreListener);
 
         void changeToLoadingStatus();
