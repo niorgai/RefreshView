@@ -14,7 +14,7 @@ import android.widget.ListView;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoAutoLoadListView extends ListView implements AbsListView.OnScrollListener, Interface.AutoLoadView {
+public class AutoLoadListView extends ListView implements AbsListView.OnScrollListener, Interface.AutoLoadView {
 
     private Context mContext;
 
@@ -37,11 +37,11 @@ public class AutoAutoLoadListView extends ListView implements AbsListView.OnScro
 
     private Interface.LoadMoreListener loadMoreListener;
 
-    public AutoAutoLoadListView(Context context) {
+    public AutoLoadListView(Context context) {
         this(context, null);
     }
 
-    public AutoAutoLoadListView(Context context, AttributeSet attrs) {
+    public AutoLoadListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         setOnScrollListener(this);
@@ -50,8 +50,8 @@ public class AutoAutoLoadListView extends ListView implements AbsListView.OnScro
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-        //没有正在加载 && 向下滑动 && 最后一个item可见
-        if (isHaveMore && !isLoadingMore && isScrollingDown && isLastItemVisible) {
+        //没有正在加载 && 向下滑动 && 最后一个item可见 && 滑动结束
+        if (isHaveMore && !isLoadingMore && isScrollingDown && isLastItemVisible && scrollState == SCROLL_STATE_IDLE) {
             if (loadMoreListener != null) {
                 loadMoreListener.loadMore();
                 isLoadingMore = true;
@@ -168,6 +168,15 @@ public class AutoAutoLoadListView extends ListView implements AbsListView.OnScro
                 return mAdapter.getItemViewType(position);
             }
             return TYPE_NORMAL;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            if (mAdapter == null) {
+                return 2;
+            } else {
+                return mAdapter.getViewTypeCount() + 2;
+            }
         }
 
         @Override

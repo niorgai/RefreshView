@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import qiu.niorgai.refreshview.bottom.AutoAutoLoadScrollView;
+import qiu.niorgai.refreshview.bottom.AutoLoadScrollView;
 import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.top.SuperRefreshLayout;
@@ -18,7 +18,7 @@ public class ScrollViewActivity extends AppCompatActivity implements Interface.L
 
     private SuperRefreshLayout refreshLayout;
 
-    private AutoAutoLoadScrollView scrollView;
+    private AutoLoadScrollView scrollView;
 
     private View content;
 
@@ -40,7 +40,7 @@ public class ScrollViewActivity extends AppCompatActivity implements Interface.L
             }
         });
 
-        scrollView = (AutoAutoLoadScrollView) findViewById(R.id.scroll_view);
+        scrollView = (AutoLoadScrollView) findViewById(R.id.scroll_view);
         content = findViewById(R.id.content);
 
         scrollView.setLoadMoreListener(this);

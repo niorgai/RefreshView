@@ -13,7 +13,7 @@
     tools:context="qiu.niorgai.refreshview.activity.ScrollViewActivity"
     tools:showIn="@layout/activity_scroll_view">
 
-    <qiu.niorgai.refreshview.bottom.AutoAutoLoadScrollView
+    <qiu.niorgai.refreshview.bottom.AutoLoadScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -29,6 +29,6 @@
                 android:gravity="center"
                 android:layout_height="300dp" />
         </LinearLayout>
-    </qiu.niorgai.refreshview.bottom.AutoAutoLoadScrollView>
+    </qiu.niorgai.refreshview.bottom.AutoLoadScrollView>
 
 </qiu.niorgai.refreshview.top.SuperRefreshLayout>

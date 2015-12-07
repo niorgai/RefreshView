@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <qiu.niorgai.refreshview.bottom.AutoAutoLoadListView
+        <qiu.niorgai.refreshview.bottom.AutoLoadListView
             android:id="@+id/list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

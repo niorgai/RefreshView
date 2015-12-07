@@ -8,7 +8,7 @@ import android.widget.ScrollView;
 /**
  * Created by qiu on 9/20/15.
  */
-public class AutoAutoLoadScrollView extends ScrollView implements Interface.AutoLoadView {
+public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoadView {
 
     //是否正在加载
     private boolean isLoadingMore = false;
@@ -19,11 +19,11 @@ public class AutoAutoLoadScrollView extends ScrollView implements Interface.Auto
 
     private BottomLoadingView mLoadingView;
 
-    public AutoAutoLoadScrollView(Context context) {
+    public AutoLoadScrollView(Context context) {
         this(context, null);
     }
 
-    public AutoAutoLoadScrollView(Context context, AttributeSet attrs) {
+    public AutoLoadScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLoadingView = new BottomLoadingView(context);
     }

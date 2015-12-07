@@ -2,7 +2,6 @@ package qiu.niorgai.refreshview.top;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -47,7 +46,6 @@ public class TopLoadingView extends FrameLayout {
 
     public void setProgress(float pre) {
         loadingImageView.setRotation(pre * 1080);
-        Log.d("run", "setProgress() called with: " + "pre = [" + pre + "]" + " is: " + isAnimating);
         if (pre > 0.99) {
             if (!isAnimating) {
                 startAnimation();

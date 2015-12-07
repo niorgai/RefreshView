@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoAutoLoadRecyclerView extends RecyclerView implements Interface.AutoLoadView {
+public class AutoLoadRecyclerView extends RecyclerView implements Interface.AutoLoadView {
 
     //是否向下滑动
     private boolean isScrollingDown = false;
@@ -33,15 +33,15 @@ public class AutoAutoLoadRecyclerView extends RecyclerView implements Interface.
 
     private Interface.LoadMoreListener loadMoreListener;
 
-    public AutoAutoLoadRecyclerView(Context context) {
+    public AutoLoadRecyclerView(Context context) {
         this(context, null);
     }
 
-    public AutoAutoLoadRecyclerView(Context context, AttributeSet attrs) {
+    public AutoLoadRecyclerView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AutoAutoLoadRecyclerView(Context context, AttributeSet attrs, int defStyle) {
+    public AutoLoadRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
@@ -52,8 +52,8 @@ public class AutoAutoLoadRecyclerView extends RecyclerView implements Interface.
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                //往下滑动 && 没有正在加载 && 注册了listener
-                if (isScrollingDown && !isLoadingMore && loadMoreListener != null) {
+                //往下滑动 && 没有正在加载 && 注册了listener && 滑动结束
+                if (isScrollingDown && !isLoadingMore && loadMoreListener != null && newState == SCROLL_STATE_IDLE) {
                     LayoutManager layoutManager = getLayoutManager();
                     if (layoutManager == null) {
                         return;

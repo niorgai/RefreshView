@@ -596,7 +596,6 @@ public class SuperRefreshLayout extends ViewGroup implements NestedScrollingPare
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.d(TAG, "onInterceptTouchEvent() called with: " + "ev = [" + ev + "]");
         ensureTarget();
 
         final int action = MotionEventCompat.getActionMasked(ev);

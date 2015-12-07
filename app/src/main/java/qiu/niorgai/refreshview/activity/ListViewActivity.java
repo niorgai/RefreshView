@@ -11,7 +11,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import qiu.niorgai.refreshview.bottom.AutoAutoLoadListView;
+import qiu.niorgai.refreshview.bottom.AutoLoadListView;
 import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.ListAdapter;
@@ -21,7 +21,7 @@ public class ListViewActivity extends AppCompatActivity implements Interface.Loa
 
     private SuperRefreshLayout refreshLayout;
 
-    private AutoAutoLoadListView listView;
+    private AutoLoadListView listView;
 
     private ListAdapter mAdapter;
 
@@ -45,7 +45,7 @@ public class ListViewActivity extends AppCompatActivity implements Interface.Loa
             }
         });
 
-        listView = (AutoAutoLoadListView) findViewById(R.id.list_view);
+        listView = (AutoLoadListView) findViewById(R.id.list_view);
         listView.setLoadMoreListener(this);
 
         data = new ArrayList<>();

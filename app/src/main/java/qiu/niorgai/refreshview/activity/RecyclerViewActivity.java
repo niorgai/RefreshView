@@ -12,7 +12,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import qiu.niorgai.refreshview.bottom.AutoAutoLoadRecyclerView;
+import qiu.niorgai.refreshview.bottom.AutoLoadRecyclerView;
 import qiu.niorgai.refreshview.bottom.Interface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.RecyclerAdapter;
@@ -22,7 +22,7 @@ public class RecyclerViewActivity extends AppCompatActivity implements Interface
 
     private SuperRefreshLayout refreshLayout;
 
-    private AutoAutoLoadRecyclerView recyclerView;
+    private AutoLoadRecyclerView recyclerView;
 
     private RecyclerAdapter mAdapter;
 
@@ -46,7 +46,7 @@ public class RecyclerViewActivity extends AppCompatActivity implements Interface
             }
         });
 
-        recyclerView = (AutoAutoLoadRecyclerView) findViewById(R.id.recycler_view);
+        recyclerView = (AutoLoadRecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLoadMoreListener(this);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 

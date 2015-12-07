@@ -13,7 +13,7 @@
     tools:context="qiu.niorgai.refreshview.activity.RecyclerViewActivity"
     tools:showIn="@layout/activity_recycler_view">
 
-    <qiu.niorgai.refreshview.bottom.AutoAutoLoadRecyclerView
+    <qiu.niorgai.refreshview.bottom.AutoLoadRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
