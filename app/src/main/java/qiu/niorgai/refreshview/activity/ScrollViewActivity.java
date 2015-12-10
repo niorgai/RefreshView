@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import qiu.niorgai.refreshview.bottom.AutoLoadScrollView;
-import qiu.niorgai.refreshview.bottom.Interface;
+import qiu.niorgai.refreshview.bottom.LoadMoreInterface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class ScrollViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
+public class ScrollViewActivity extends AppCompatActivity implements LoadMoreInterface.onLoadMoreListener {
 
     private SuperRefreshLayout refreshLayout;
 
@@ -43,7 +43,7 @@ public class ScrollViewActivity extends AppCompatActivity implements Interface.L
         scrollView = (AutoLoadScrollView) findViewById(R.id.scroll_view);
         content = findViewById(R.id.content);
 
-        scrollView.setLoadMoreListener(this);
+        scrollView.setOnLoadMoreListener(this);
 
         refreshLayout = (SuperRefreshLayout) findViewById(R.id.refresh_layout);
         refreshLayout.setOnRefreshListener(new SuperRefreshLayout.OnRefreshListener() {
@@ -70,7 +70,7 @@ public class ScrollViewActivity extends AppCompatActivity implements Interface.L
     }
 
     @Override
-    public void loadMore() {
+    public void onLoadMore() {
         Toast.makeText(this, "start loading more", Toast.LENGTH_SHORT).show();
         scrollView.postDelayed(new Runnable() {
             @Override
@@ -83,9 +83,9 @@ public class ScrollViewActivity extends AppCompatActivity implements Interface.L
 
                 count++;
 
-                scrollView.onComplete(count != 4);
+                scrollView.onSuccess(count != 4);
 //                or Error
-//                scrollView.onError();
+//                scrollView.onFailure();
             }
         }, 3000);
     }

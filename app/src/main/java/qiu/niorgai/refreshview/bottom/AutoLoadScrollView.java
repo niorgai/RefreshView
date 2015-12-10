@@ -8,14 +8,14 @@ import android.widget.ScrollView;
 /**
  * Created by qiu on 9/20/15.
  */
-public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoadView {
+public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.AutoLoadView{
 
     //是否正在加载
     private boolean isLoadingMore = false;
-    //    是否有更多
-    private boolean isHaveMore = true;
+    //是否有更多
+    private boolean isHaveMore = false;
 
-    private Interface.LoadMoreListener loadMoreListener;
+    private LoadMoreInterface.onLoadMoreListener loadMoreListener;
 
     private BottomLoadingView mLoadingView;
 
@@ -26,6 +26,16 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
     public AutoLoadScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLoadingView = new BottomLoadingView(context);
+    }
+
+    public interface onScrolledListener {
+        void scrollChanged(int l, int t, int oldl, int oldt);
+    }
+
+    private onScrolledListener listener;
+
+    public void setListener(onScrolledListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -56,13 +66,16 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
+        if (listener != null) {
+            listener.scrollChanged(l, t, oldl, oldt);
+        }
         //需要监听滑动
         if (isHaveMore && !isLoadingMore && loadMoreListener != null) {
             if (t > oldt) {
                 //正在向下滑动
                 if (t + getHeight() >= computeVerticalScrollRange() - mLoadingView.getMeasuredHeight() / 2) {
                     //已经滑动到底部
-                    loadMoreListener.loadMore();
+                    loadMoreListener.onLoadMore();
                     isLoadingMore = true;
                     mLoadingView.changeToLoadingStatus();
                 }
@@ -71,7 +84,7 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
     }
 
     @Override
-    public void onComplete(boolean hasMore) {
+    public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHaveMore = hasMore;
         if (!isHaveMore) {
@@ -85,7 +98,7 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
             }
             int scrollViewHeight = getMeasuredHeight();
             int childViewHeight = group.getMeasuredHeight();
-            if (scrollViewHeight >= childViewHeight) {
+            if (scrollViewHeight == childViewHeight) {
                 //此时未填满屏幕
                 mLoadingView.changeToClickStatus(loadMoreListener);
             } else {
@@ -96,7 +109,7 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
     }
 
     @Override
-    public void onError() {
+    public void onFailure() {
         isLoadingMore = false;
         if (isHaveMore) {
             mLoadingView.changeToClickStatus(loadMoreListener);
@@ -109,8 +122,8 @@ public class AutoLoadScrollView extends ScrollView implements Interface.AutoLoad
     }
 
     @Override
-    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
-        this.loadMoreListener = loadMoreListener;
+    public void setOnLoadMoreListener(LoadMoreInterface.onLoadMoreListener listener) {
+        this.loadMoreListener = listener;
     }
 
     //获取子ViewGroup

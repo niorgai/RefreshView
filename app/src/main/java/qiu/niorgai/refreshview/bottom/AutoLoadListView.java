@@ -14,7 +14,9 @@ import android.widget.ListView;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoLoadListView extends ListView implements AbsListView.OnScrollListener, Interface.AutoLoadView {
+public class AutoLoadListView extends ListView implements AbsListView.OnScrollListener, LoadMoreInterface.AutoLoadView {
+
+    public static final String TAG = "AutoLoadListView";
 
     private Context mContext;
 
@@ -35,7 +37,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     //TYPE_NORMAL为普通item,由adapter控制
     private static final int TYPE_NORMAL = -2;
 
-    private Interface.LoadMoreListener loadMoreListener;
+    private LoadMoreInterface.onLoadMoreListener onLoadMoreListener;
 
     public AutoLoadListView(Context context) {
         this(context, null);
@@ -47,13 +49,26 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
         setOnScrollListener(this);
     }
 
+    public interface onScrolledListener {
+        void scrollStateChanged(AbsListView view, int scrollState);
+        void scroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount);
+    }
+
+    private onScrolledListener listener;
+
+    public void setListener(onScrolledListener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (listener != null) {
+            listener.scrollStateChanged(view, scrollState);
+        }
         //没有正在加载 && 向下滑动 && 最后一个item可见 && 滑动结束
         if (isHaveMore && !isLoadingMore && isScrollingDown && isLastItemVisible && scrollState == SCROLL_STATE_IDLE) {
-            if (loadMoreListener != null) {
-                loadMoreListener.loadMore();
+            if (onLoadMoreListener != null) {
+                onLoadMoreListener.onLoadMore();
                 isLoadingMore = true;
             }
         }
@@ -61,6 +76,9 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        if (listener != null) {
+            listener.scroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+        }
         //判断是否最后一个item可见).
         if (firstVisibleItem + visibleItemCount >= totalItemCount) {
             isLastItemVisible = true;
@@ -98,16 +116,16 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     }
 
     @Override
-    public void onComplete(boolean hasMore) {
+    public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHaveMore = hasMore;
     }
 
     @Override
-    public void onError() {
+    public void onFailure() {
         isLoadingMore = false;
         if (mLoadingView != null) {
-            mLoadingView.changeToClickStatus(loadMoreListener);
+            mLoadingView.changeToClickStatus(onLoadMoreListener);
         }
     }
 
@@ -117,8 +135,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     }
 
     @Override
-    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
-        this.loadMoreListener = loadMoreListener;
+    public void setOnLoadMoreListener(LoadMoreInterface.onLoadMoreListener onLoadMoreListener) {
+        this.onLoadMoreListener = onLoadMoreListener;
     }
 
     @Override
@@ -218,7 +236,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
                 int allCount = getCount();
                 if (childViewCount == allCount - 1 && isHaveMore) {
                     //未填满屏幕并且有更多
-                    mLoadingView.changeToClickStatus(loadMoreListener);
+                    mLoadingView.changeToClickStatus(onLoadMoreListener);
                 } else {
                     mLoadingView.changeToLoadingStatus();
                 }

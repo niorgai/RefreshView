@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 /**
  * Created by qiu on 9/18/15.
  */
-public class AutoLoadRecyclerView extends RecyclerView implements Interface.AutoLoadView {
+public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterface.AutoLoadView {
 
     //是否向下滑动
     private boolean isScrollingDown = false;
@@ -31,7 +31,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
 
     private boolean isHasMore = false;
 
-    private Interface.LoadMoreListener loadMoreListener;
+    private LoadMoreInterface.onLoadMoreListener onLoadMoreListener;
 
     public AutoLoadRecyclerView(Context context) {
         this(context, null);
@@ -46,14 +46,33 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
         init(context);
     }
 
+    //original scroll listener
+    public interface OnScrolledListener {
+        void scrollStateChanged(RecyclerView recyclerView, int newState);
+        void scrolled(RecyclerView recyclerView, int dx, int dy);
+    }
+
+    private OnScrolledListener scrolledListener;
+
+    public OnScrolledListener getScrolledListener() {
+        return scrolledListener;
+    }
+
+    public void setScrolledListener(OnScrolledListener scrolledListener) {
+        this.scrolledListener = scrolledListener;
+    }
+
     private void init(Context context) {
         mLoadingView = new BottomLoadingView(context);
         this.setOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                if (scrolledListener != null) {
+                    scrolledListener.scrollStateChanged(recyclerView, newState);
+                }
                 //往下滑动 && 没有正在加载 && 注册了listener && 滑动结束
-                if (isScrollingDown && !isLoadingMore && loadMoreListener != null && newState == SCROLL_STATE_IDLE) {
+                if (isHasMore && isScrollingDown && !isLoadingMore && onLoadMoreListener != null && newState == SCROLL_STATE_IDLE) {
                     LayoutManager layoutManager = getLayoutManager();
                     if (layoutManager == null) {
                         return;
@@ -63,7 +82,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
                             && layoutManager.getItemCount() > layoutManager.getChildCount()
                             && lastVisibleItemPosition >= layoutManager.getItemCount() - 1) {
                         isLoadingMore = true;
-                        loadMoreListener.loadMore();
+                        onLoadMoreListener.onLoadMore();
                         mLoadingView.changeToLoadingStatus();
                     }
                 }
@@ -72,6 +91,9 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                if (scrolledListener != null) {
+                    scrolledListener.scrolled(recyclerView, dx, dy);
+                }
                 //记录是否正在向下滑动
                 isScrollingDown = dy > 0;
             }
@@ -142,15 +164,15 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
     }
 
     @Override
-    public void onComplete(boolean hasMore) {
+    public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHasMore = hasMore;
     }
 
     @Override
-    public void onError() {
+    public void onFailure() {
         isLoadingMore = false;
-        mLoadingView.changeToClickStatus(loadMoreListener);
+        mLoadingView.changeToClickStatus(onLoadMoreListener);
     }
 
     @Override
@@ -159,8 +181,8 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
     }
 
     @Override
-    public void setLoadMoreListener(Interface.LoadMoreListener loadMoreListener) {
-        this.loadMoreListener = loadMoreListener;
+    public void setOnLoadMoreListener(LoadMoreInterface.onLoadMoreListener onLoadMoreListener) {
+        this.onLoadMoreListener = onLoadMoreListener;
     }
 
     //Wrapper模式封装Adapter
@@ -173,11 +195,11 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
         }
 
         @Override
-        public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
-            super.onViewAttachedToWindow(holder);
+        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+            super.onAttachedToRecyclerView(recyclerView);
             //为Footer单独设置SpanSize
-            RecyclerView.LayoutManager manager = getLayoutManager();
-            if(manager instanceof GridLayoutManager) {
+            RecyclerView.LayoutManager manager = recyclerView.getLayoutManager();
+            if (manager instanceof GridLayoutManager) {
                 final GridLayoutManager gridManager = ((GridLayoutManager) manager);
                 final GridLayoutManager.SpanSizeLookup originSizeLookup = gridManager.getSpanSizeLookup();
                 gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -187,6 +209,12 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
                     }
                 });
             }
+        }
+
+        @Override
+        public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+            super.onViewAttachedToWindow(holder);
+            //为Footer单独设置SpanSize
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if(lp != null
                     && lp instanceof StaggeredGridLayoutManager.LayoutParams
@@ -220,7 +248,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements Interface.Auto
                 if (lastPosition < childCount) {
                     //不充满的情况下
                     if (isHasMore) {
-                        mLoadingView.changeToClickStatus(loadMoreListener);
+                        mLoadingView.changeToClickStatus(onLoadMoreListener);
                     }
                 } else {
                     if (isHasMore) {

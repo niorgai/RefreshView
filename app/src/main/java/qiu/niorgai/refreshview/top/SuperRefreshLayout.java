@@ -688,6 +688,7 @@ public class SuperRefreshLayout extends ViewGroup implements NestedScrollingPare
 //        } else {
 //            super.requestDisallowInterceptTouchEvent(b);
 //        }
+        hasRequestDisallowIntercept = true;
     }
 
     // NestedScrollingParent

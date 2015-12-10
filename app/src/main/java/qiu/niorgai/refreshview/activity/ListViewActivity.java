@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import qiu.niorgai.refreshview.bottom.AutoLoadListView;
-import qiu.niorgai.refreshview.bottom.Interface;
+import qiu.niorgai.refreshview.bottom.LoadMoreInterface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.ListAdapter;
 import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class ListViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
+public class ListViewActivity extends AppCompatActivity implements LoadMoreInterface.onLoadMoreListener {
 
     private SuperRefreshLayout refreshLayout;
 
@@ -46,7 +46,7 @@ public class ListViewActivity extends AppCompatActivity implements Interface.Loa
         });
 
         listView = (AutoLoadListView) findViewById(R.id.list_view);
-        listView.setLoadMoreListener(this);
+        listView.setOnLoadMoreListener(this);
 
         data = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class ListViewActivity extends AppCompatActivity implements Interface.Loa
     }
 
     @Override
-    public void loadMore() {
+    public void onLoadMore() {
         Toast.makeText(this, "start loading more", Toast.LENGTH_SHORT).show();
         listView.postDelayed(new Runnable() {
             @Override
@@ -94,7 +94,7 @@ public class ListViewActivity extends AppCompatActivity implements Interface.Loa
 
                 listView.setIsHaveMore(count != 4);
 //                or Error
-//                listView.onError();
+//                listView.onFailure();
             }
         }, 3000);
     }

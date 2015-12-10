@@ -29,16 +29,16 @@ public class BottomLoadingView extends LinearLayout {
         textView.setLayoutParams(params);
     }
 
-    public void changeToClickStatus(final Interface.LoadMoreListener loadMoreListener) {
+    public void changeToClickStatus(final LoadMoreInterface.onLoadMoreListener onLoadMoreListener) {
         setVisibility(VISIBLE);
         textView.setText("click to load");
-        if (loadMoreListener != null) {
+        if (onLoadMoreListener != null) {
             textView.setClickable(true);
             textView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     textView.setText("loading");
-                    loadMoreListener.loadMore();
+                    onLoadMoreListener.onLoadMore();
                     textView.setClickable(false);
                 }
             });

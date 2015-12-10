@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import qiu.niorgai.refreshview.bottom.AutoLoadRecyclerView;
-import qiu.niorgai.refreshview.bottom.Interface;
+import qiu.niorgai.refreshview.bottom.LoadMoreInterface;
 import qiu.niorgai.refreshview.R;
 import qiu.niorgai.refreshview.adapter.RecyclerAdapter;
 import qiu.niorgai.refreshview.top.SuperRefreshLayout;
 
-public class RecyclerViewActivity extends AppCompatActivity implements Interface.LoadMoreListener {
+public class RecyclerViewActivity extends AppCompatActivity implements LoadMoreInterface.onLoadMoreListener {
 
     private SuperRefreshLayout refreshLayout;
 
@@ -47,7 +47,7 @@ public class RecyclerViewActivity extends AppCompatActivity implements Interface
         });
 
         recyclerView = (AutoLoadRecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLoadMoreListener(this);
+        recyclerView.setOnLoadMoreListener(this);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
         data = new ArrayList<>();
@@ -81,7 +81,7 @@ public class RecyclerViewActivity extends AppCompatActivity implements Interface
     }
 
     @Override
-    public void loadMore() {
+    public void onLoadMore() {
         Toast.makeText(this, "start loading more", Toast.LENGTH_SHORT).show();
         recyclerView.postDelayed(new Runnable() {
             @Override
@@ -93,9 +93,9 @@ public class RecyclerViewActivity extends AppCompatActivity implements Interface
                 mAdapter.notifyDataSetChanged();
 
                 count++;
-                recyclerView.onComplete(count != 4);
+                recyclerView.onSuccess(count != 4);
 //                or load Error
-//                recyclerView.onError();
+//                recyclerView.onFailure();
             }
         }, 3000);
     }
