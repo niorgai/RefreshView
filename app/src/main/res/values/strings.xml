@@ -4,4 +4,7 @@
     <string name="title_activity_list_view">ListViewActivity</string>
     <string name="title_activity_recycler_view">RecyclerViewActivity</string>
     <string name="title_activity_scroll_view">ScrollViewActivity</string>
+
+    <string name="click_to_load">点击加载</string>
+    <string name="load_view_loading">加载中</string>
 </resources>

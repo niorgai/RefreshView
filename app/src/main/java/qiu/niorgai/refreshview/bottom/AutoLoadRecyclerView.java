@@ -79,8 +79,8 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
                     }
                     int lastVisibleItemPosition = getLastPosition();
                     if (layoutManager.getChildCount() > 0
-                            && layoutManager.getItemCount() > layoutManager.getChildCount()
-                            && lastVisibleItemPosition >= layoutManager.getItemCount() - 1) {
+                            && layoutManager.getItemCount() >= layoutManager.getChildCount()
+                            && lastVisibleItemPosition >= layoutManager.getItemCount()) {
                         isLoadingMore = true;
                         onLoadMoreListener.onLoadMore();
                         mLoadingView.changeToLoadingStatus();
@@ -113,7 +113,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         } else {
             lastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
         }
-        return lastVisibleItemPosition;
+        return lastVisibleItemPosition + 1;
     }
 
     private int findMax(int[] lastPositions) {
@@ -243,9 +243,8 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof FooterViewHolder) {
-                int lastPosition = getLastPosition();
                 int childCount = getLayoutManager().getChildCount();
-                if (lastPosition < childCount) {
+                if (position < childCount) {
                     //不充满的情况下
                     if (isHasMore) {
                         mLoadingView.changeToClickStatus(onLoadMoreListener);

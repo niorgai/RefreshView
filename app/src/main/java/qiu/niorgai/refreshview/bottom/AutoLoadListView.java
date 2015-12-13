@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -32,6 +33,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     private BottomLoadingView mLoadingView;
 
+    private WrapAdapter mAdapter;
+
     //TYPE_FOOTER为FooterView
     private static final int TYPE_FOOTER = -1;
     //TYPE_NORMAL为普通item,由adapter控制
@@ -56,7 +59,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     private onScrolledListener listener;
 
-    public void setListener(onScrolledListener listener) {
+    public void setonScrolledListener(onScrolledListener listener) {
         this.listener = listener;
     }
 
@@ -141,7 +144,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     @Override
     public void setAdapter(ListAdapter adapter) {
-        final WrapAdapter mAdapter = new WrapAdapter(adapter);
+        mAdapter = new WrapAdapter(adapter);
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -166,6 +169,26 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
             }
         });
         super.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        final OnItemClickListener listenerToSet = listener;
+        super.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isHaveMore && (position <= mAdapter.getCount() - 1)) {
+                    //防止点击了
+                    if (listenerToSet != null) {
+                        listenerToSet.onItemClick(parent, view, position, id);
+                    }
+                } else {
+                    if (listenerToSet != null) {
+                        listenerToSet.onItemClick(parent, view, position, id);
+                    }
+                }
+            }
+        });
     }
 
     //封装Adapter加上LoadingView
@@ -242,6 +265,10 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
                 }
                 return convertView;
             } else {
+                if (convertView instanceof BottomLoadingView) {
+                    //防止错位
+                    return mAdapter.getView(position, null, parent);
+                }
                 return mAdapter.getView(position, convertView, parent);
             }
         }

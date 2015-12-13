@@ -92,7 +92,7 @@ public class ListViewActivity extends AppCompatActivity implements LoadMoreInter
                 mAdapter.notifyDataSetChanged();
                 count ++;
 
-                listView.setIsHaveMore(count != 4);
+                listView.onSuccess(count != 4);
 //                or Error
 //                listView.onFailure();
             }
