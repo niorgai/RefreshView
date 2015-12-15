@@ -59,7 +59,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
 
     private onScrolledListener listener;
 
-    public void setonScrolledListener(onScrolledListener listener) {
+    public void setListener(onScrolledListener listener) {
         this.listener = listener;
     }
 
@@ -149,23 +149,15 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
             @Override
             public void onChanged() {
                 super.onChanged();
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
+                requestLayout();
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onInvalidated() {
                 super.onInvalidated();
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.notifyDataSetInvalidated();
-                    }
-                });
+                requestLayout();
+                mAdapter.notifyDataSetInvalidated();
             }
         });
         super.setAdapter(mAdapter);
@@ -177,11 +169,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
         super.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (isHaveMore && (position <= mAdapter.getCount() - 1)) {
-                    //防止点击了
-                    if (listenerToSet != null) {
-                        listenerToSet.onItemClick(parent, view, position, id);
-                    }
+                if (isHaveMore && position == mAdapter.getCount()) {
+                    //防止点击了Footer
                 } else {
                     if (listenerToSet != null) {
                         listenerToSet.onItemClick(parent, view, position, id);
@@ -274,3 +263,4 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
         }
     }
 }
+
