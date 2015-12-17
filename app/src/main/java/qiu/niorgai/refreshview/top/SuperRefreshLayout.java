@@ -1078,7 +1078,7 @@ public class SuperRefreshLayout extends ViewGroup implements NestedScrollingPare
     }
 
     private void setTargetOffsetTopAndBottom(int offset, boolean requiresUpdate) {
-        mLoadingView.bringToFront();
+//        mLoadingView.bringToFront();
         mLoadingView.offsetTopAndBottom(offset);
         mCurrentTargetOffsetTop = mLoadingView.getTop();
         if (requiresUpdate && android.os.Build.VERSION.SDK_INT < 11) {
