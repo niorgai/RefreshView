@@ -159,6 +159,8 @@ public class SuperRefreshLayout extends ViewGroup implements NestedScrollingPare
             if (mRefreshing) {
                 // Make sure the progress view is fully visible
                 mLoadingView.setViewAlpha(1);
+                ViewCompat.setScaleX(mLoadingView, 1f);
+                ViewCompat.setScaleY(mLoadingView, 1f);
                 mLoadingView.startAnimation();
                 if (mNotify) {
                     if (mListener != null) {
@@ -755,7 +757,7 @@ public class SuperRefreshLayout extends ViewGroup implements NestedScrollingPare
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed,
                                int dyUnconsumed) {
-        if (dyUnconsumed < 0) {
+        if (!mRefreshing && dyUnconsumed < 0) {
             dyUnconsumed = Math.abs(dyUnconsumed);
             mTotalUnconsumed += dyUnconsumed;
             moveSpinner(mTotalUnconsumed);
