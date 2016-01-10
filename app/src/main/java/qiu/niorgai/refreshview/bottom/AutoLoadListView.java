@@ -13,6 +13,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 /**
+ * 自动加载更多的ListView
  * Created by qiu on 9/18/15.
  */
 public class AutoLoadListView extends ListView implements AbsListView.OnScrollListener, LoadMoreInterface.AutoLoadView {

@@ -10,9 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
+ * 自动加载更多,可以设置EmptyView的RecyclerView
  * Created by qiu on 9/18/15.
  */
 public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterface.AutoLoadView {
+
+    private View mEmptyView;
 
     //是否向下滑动
     private boolean isScrollingDown = false;
@@ -20,12 +23,14 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     private boolean isLoadingMore = false;
 
     //TYPE_FOOTER为FooterView
-    private static final int TYPE_FOOTER = -1;
+    public static final int TYPE_FOOTER = -1;
     //TYPE_NORMAL为普通item,由adapter控制
     private static final int TYPE_NORMAL = -2;
 
     //Wrapper模式,为adapter再封装一层,同时加入FooterView
     private WrapAdapter mWrapAdapter;
+
+    private Adapter mOriginAdapter;
 
     private BottomLoadingView mLoadingView;
 
@@ -126,41 +131,51 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         return max;
     }
 
+    private AdapterDataObserver mObserver = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onChanged() {
+            mWrapAdapter.notifyDataSetChanged();
+            checkEmpty();
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            mWrapAdapter.notifyItemRangeInserted(positionStart, itemCount);
+            checkEmpty();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+            mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            mWrapAdapter.notifyItemRangeRemoved(positionStart, itemCount);
+            checkEmpty();
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            mWrapAdapter.notifyItemMoved(fromPosition, toPosition);
+        }
+    };
+
     @Override
     public void setAdapter(Adapter adapter) {
+        if (mOriginAdapter != null) {
+            mOriginAdapter.unregisterAdapterDataObserver(mObserver);
+        }
         mWrapAdapter = new WrapAdapter(adapter);
         super.setAdapter(mWrapAdapter);
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onChanged() {
-                mWrapAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                mWrapAdapter.notifyItemRangeInserted(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
-                mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount, payload);
-            }
-
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                mWrapAdapter.notifyItemRangeRemoved(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                mWrapAdapter.notifyItemMoved(fromPosition, toPosition);
-            }
-        });
+        adapter.registerAdapterDataObserver(mObserver);
+        mOriginAdapter = adapter;
+        checkEmpty();
     }
 
     @Override
@@ -185,10 +200,39 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         this.onLoadMoreListener = onLoadMoreListener;
     }
 
+    public Adapter getAutoLoadRecyclerViewAdapter(){
+        if (mWrapAdapter != null){
+            return mWrapAdapter.getAdapter();
+        }else {
+            return null;
+        }
+    }
+
+    public View getEmptyView() {
+        return mEmptyView;
+    }
+
+    public void setEmptyView(View mEmptyView) {
+        this.mEmptyView = mEmptyView;
+        checkEmpty();
+    }
+
+    private void checkEmpty() {
+        if (mEmptyView != null && getAdapter() != null) {
+            final boolean emptyFlag = getAdapter().getItemCount() == 0;
+            setVisibility(emptyFlag ? GONE : VISIBLE);
+            mEmptyView.setVisibility(emptyFlag ? VISIBLE : GONE);
+        }
+    }
+
     //Wrapper模式封装Adapter
     private class WrapAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         private Adapter mAdapter;
+
+        public Adapter getAdapter(){
+            return mAdapter;
+        }
 
         public WrapAdapter(RecyclerView.Adapter adapter) {
             this.mAdapter = adapter;

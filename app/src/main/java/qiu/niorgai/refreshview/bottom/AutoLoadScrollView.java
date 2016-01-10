@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 /**
+ * 自动加载更多的ScrollView
  * Created by qiu on 9/20/15.
  */
 public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.AutoLoadView{
