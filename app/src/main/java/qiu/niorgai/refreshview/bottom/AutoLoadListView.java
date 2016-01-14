@@ -116,7 +116,11 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
             default:
                 break;
         }
-        return super.onTouchEvent(ev);
+        try {
+            return super.onTouchEvent(ev);
+        } catch (IllegalStateException ex) {
+            return false;
+        }
     }
 
     @Override
