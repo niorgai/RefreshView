@@ -300,7 +300,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof FooterViewHolder) {
                 int childCount = getLayoutManager().getChildCount();
-                if (position < childCount) {
+                if (position <= childCount) {
                     //不充满的情况下
                     if (isHasMore) {
                         mLoadingView.changeToClickStatus(onLoadMoreListener);
