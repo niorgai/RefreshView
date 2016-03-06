@@ -25,6 +25,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     private float mDownY;
     //是否向下滑动
     private boolean isScrollingDown = false;
+    //是否从下面布局
+    private boolean isStackFromBottom = false;
     //是否最后一个item可见
     private boolean isLastItemVisible = false;
     //是否正在加载
@@ -65,6 +67,12 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     }
 
     @Override
+    public void setStackFromBottom(boolean stackFromBottom) {
+        isStackFromBottom = stackFromBottom;
+        super.setStackFromBottom(stackFromBottom);
+    }
+
+    @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         if (listener != null) {
             listener.scrollStateChanged(view, scrollState);
@@ -102,15 +110,27 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
                 isScrollingDown = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (ev.getY() < mDownY) {
-                    //有滑动动作且是往下滚动
-                    isScrollingDown = true;
+                if (!isStackFromBottom) {
+                    if (ev.getY() < mDownY) {
+                        //有滑动动作且是往下滚动
+                        isScrollingDown = true;
+                    }
+                } else {
+                    if (ev.getY() > mDownY) {
+                        isScrollingDown = true;
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (ev.getY() < mDownY) {
-                    //有滑动动作且是往下滚动
-                    isScrollingDown = true;
+                if (!isStackFromBottom) {
+                    if (ev.getY() < mDownY) {
+                        //有滑动动作且是往下滚动
+                        isScrollingDown = true;
+                    }
+                } else {
+                    if (ev.getY() > mDownY) {
+                        isScrollingDown = true;
+                    }
                 }
                 break;
             default:

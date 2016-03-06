@@ -19,6 +19,8 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
 
     //是否向下滑动
     private boolean isScrollingDown = false;
+    //是否反向布局
+    private boolean isReverseLayout = false;
     //是否正在加载
     private boolean isLoadingMore = false;
 
@@ -100,7 +102,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
                     scrolledListener.scrolled(recyclerView, dx, dy);
                 }
                 //记录是否正在向下滑动
-                isScrollingDown = dy > 0;
+                isScrollingDown = isReverseLayout ? dy < 0 : dy > 0;
             }
         });
     }
@@ -176,6 +178,16 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         adapter.registerAdapterDataObserver(mObserver);
         mOriginAdapter = adapter;
         checkEmpty();
+    }
+
+    @Override
+    public void setLayoutManager(LayoutManager layout) {
+        super.setLayoutManager(layout);
+        if (layout instanceof LinearLayoutManager) {
+            isReverseLayout = ((LinearLayoutManager) layout).getReverseLayout();
+        } else if (layout instanceof StaggeredGridLayoutManager) {
+            isReverseLayout = ((StaggeredGridLayoutManager) layout).getReverseLayout();
+        }
     }
 
     @Override
