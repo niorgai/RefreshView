@@ -194,17 +194,25 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHasMore = hasMore;
+        if (mWrapAdapter != null) {
+            mWrapAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onFailure() {
         isLoadingMore = false;
-        mLoadingView.changeToClickStatus(onLoadMoreListener);
+        if (mWrapAdapter != null) {
+            mWrapAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void setIsHaveMore(boolean isHasMore) {
         this.isHasMore = isHasMore;
+        if (mWrapAdapter != null) {
+            mWrapAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

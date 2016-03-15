@@ -147,19 +147,25 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHaveMore = hasMore;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onFailure() {
         isLoadingMore = false;
-        if (mLoadingView != null) {
-            mLoadingView.changeToClickStatus(onLoadMoreListener);
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void setIsHaveMore(boolean isHaveMore) {
         this.isHaveMore = isHaveMore;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
