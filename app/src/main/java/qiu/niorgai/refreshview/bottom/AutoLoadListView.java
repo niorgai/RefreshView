@@ -29,6 +29,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     private boolean isStackFromBottom = false;
     //是否最后一个item可见
     private boolean isLastItemVisible = false;
+    //是否加载失败,此时应该变成点击加载更多
+    private boolean isLoadingFail = false;
     //是否正在加载
     private boolean isLoadingMore = false;
 
@@ -144,9 +146,19 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     }
 
     @Override
+    public void onStart() {
+        if (onLoadMoreListener != null) {
+            isLoadingMore = true;
+            isLoadingFail = false;
+            onLoadMoreListener.onLoadMore();
+        }
+    }
+
+    @Override
     public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHaveMore = hasMore;
+        isLoadingFail = false;
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
@@ -155,6 +167,7 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
     @Override
     public void onFailure() {
         isLoadingMore = false;
+        isLoadingFail = true;
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
@@ -272,6 +285,16 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
             if (getItemViewType(position) == TYPE_FOOTER) {
                 if (convertView == null) {
                     convertView = new BottomLoadingView(mContext);
+                    convertView.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (!isLoadingFail) {
+                                return;
+                            }
+                            mLoadingView.changeToLoadingStatus();
+                            onStart();
+                        }
+                    });
                     convertView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 }
                 mLoadingView = (BottomLoadingView) convertView;
@@ -279,7 +302,8 @@ public class AutoLoadListView extends ListView implements AbsListView.OnScrollLi
                 int allCount = getCount();
                 if (childViewCount == allCount - 1 && isHaveMore) {
                     //未填满屏幕并且有更多
-                    mLoadingView.changeToClickStatus(onLoadMoreListener);
+                    isLoadingFail = true;
+                    mLoadingView.changeToClickStatus();
                 } else {
                     mLoadingView.changeToLoadingStatus();
                 }

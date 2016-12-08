@@ -2,6 +2,7 @@ package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 
@@ -9,14 +10,16 @@ import android.widget.ScrollView;
  * 自动加载更多的ScrollView
  * Created by qiu on 9/20/15.
  */
-public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.AutoLoadView{
+public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.AutoLoadView {
 
     //是否正在加载
     private boolean isLoadingMore = false;
     //是否有更多
     private boolean isHaveMore = false;
-
-    private LoadMoreInterface.onLoadMoreListener loadMoreListener;
+    //是否加载失败,此时应该变成点击加载更多
+    private boolean isLoadingFail = false;
+    
+    private LoadMoreInterface.onLoadMoreListener onLoadMoreListener;
 
     private BottomLoadingView mLoadingView;
 
@@ -27,6 +30,16 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
     public AutoLoadScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLoadingView = new BottomLoadingView(context);
+        mLoadingView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isLoadingFail) {
+                    return;
+                }
+                mLoadingView.changeToLoadingStatus();
+                onStart();
+            }
+        });
     }
 
     public interface onScrolledListener {
@@ -54,8 +67,9 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
             int childViewHeight = group.getMeasuredHeight();
             if (scrollViewHeight == childViewHeight) {
                 //此时未填满屏幕
+                isLoadingFail = true;
                 group.addView(mLoadingView, group.getChildCount());
-                mLoadingView.changeToClickStatus(loadMoreListener);
+                mLoadingView.changeToClickStatus();
             } else {
                 //填满屏幕了
                 group.addView(mLoadingView, group.getChildCount());
@@ -71,12 +85,12 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
             listener.scrollChanged(l, t, oldl, oldt);
         }
         //需要监听滑动
-        if (isHaveMore && !isLoadingMore && loadMoreListener != null) {
+        if (isHaveMore && !isLoadingMore && onLoadMoreListener != null) {
             if (t > oldt) {
                 //正在向下滑动
                 if (t + getHeight() >= computeVerticalScrollRange() - mLoadingView.getMeasuredHeight() / 2) {
                     //已经滑动到底部
-                    loadMoreListener.onLoadMore();
+                    onLoadMoreListener.onLoadMore();
                     isLoadingMore = true;
                     mLoadingView.changeToLoadingStatus();
                 }
@@ -85,9 +99,19 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
     }
 
     @Override
+    public void onStart() {
+        if (onLoadMoreListener != null) {
+            isLoadingMore = true;
+            isLoadingFail = false;
+            onLoadMoreListener.onLoadMore();
+        }
+    }
+
+    @Override
     public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
         isHaveMore = hasMore;
+        isLoadingFail = false;
         if (!isHaveMore) {
             mLoadingView.changeToHideStatus();
         } else {
@@ -101,7 +125,7 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
             int childViewHeight = group.getMeasuredHeight();
             if (scrollViewHeight == childViewHeight) {
                 //此时未填满屏幕
-                mLoadingView.changeToClickStatus(loadMoreListener);
+                mLoadingView.changeToClickStatus();
             } else {
                 //填满屏幕了
                 mLoadingView.changeToLoadingStatus();
@@ -112,8 +136,9 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
     @Override
     public void onFailure() {
         isLoadingMore = false;
+        isLoadingFail = true;
         if (isHaveMore) {
-            mLoadingView.changeToClickStatus(loadMoreListener);
+            mLoadingView.changeToClickStatus();
         }
     }
 
@@ -124,7 +149,7 @@ public class AutoLoadScrollView extends ScrollView implements LoadMoreInterface.
 
     @Override
     public void setOnLoadMoreListener(LoadMoreInterface.onLoadMoreListener listener) {
-        this.loadMoreListener = listener;
+        this.onLoadMoreListener = listener;
     }
 
     //获取子ViewGroup

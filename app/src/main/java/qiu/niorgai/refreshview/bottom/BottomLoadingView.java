@@ -2,7 +2,6 @@ package qiu.niorgai.refreshview.bottom;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -47,28 +46,22 @@ public class BottomLoadingView extends FrameLayout {
         progressImage.setAnimation(rotateAnimation);
     }
 
-    public void changeToClickStatus(final LoadMoreInterface.onLoadMoreListener onLoadMoreListener) {
+    public void changeToClickStatus() {
         setVisibility(VISIBLE);
         progressImage.setVisibility(GONE);
         rotateAnimation.cancel();
         textView.setText(R.string.click_to_load);
-        if (onLoadMoreListener != null) {
-            BottomLoadingView.this.setClickable(true);
-            BottomLoadingView.this.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    textView.setText(R.string.load_view_loading);
-                    onLoadMoreListener.onLoadMore();
-                    BottomLoadingView.this.setClickable(false);
-                }
-            });
-        }
     }
 
     public void changeToLoadingStatus() {
         setVisibility(VISIBLE);
         progressImage.setVisibility(VISIBLE);
-        rotateAnimation.start();
+        if (progressImage.getAnimation() == null) {
+            progressImage.setAnimation(rotateAnimation);
+        }
+        if (!rotateAnimation.hasStarted()) {
+            rotateAnimation.start();
+        }
         textView.setText(R.string.load_view_loading);
     }
 

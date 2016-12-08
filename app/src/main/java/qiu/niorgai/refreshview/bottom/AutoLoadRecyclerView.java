@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /**
  * 自动加载更多,可以设置EmptyView的RecyclerView
  * Created by qiu on 9/18/15.
@@ -19,22 +21,26 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
 
     //是否向下滑动
     private boolean isScrollingDown = false;
+
     //是否反向布局
-    private boolean isReverseLayout = false;
+    private boolean isReserveLayout = false;
+
     //是否正在加载
     private boolean isLoadingMore = false;
+
+    //是否加载失败,此时应该变成点击加载更多
+    private boolean isLoadingFail = false;
 
     //TYPE_FOOTER为FooterView
     public static final int TYPE_FOOTER = -1;
     //TYPE_NORMAL为普通item,由adapter控制
     private static final int TYPE_NORMAL = -2;
+    private static final int TYPE_HEADER = -3;
 
     //Wrapper模式,为adapter再封装一层,同时加入FooterView
     private WrapAdapter mWrapAdapter;
 
     private Adapter mOriginAdapter;
-
-    private BottomLoadingView mLoadingView;
 
     private boolean isHasMore = false;
 
@@ -51,33 +57,16 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     public AutoLoadRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
-    }
-
-    //original scroll listener
-    public interface OnScrolledListener {
-        void scrollStateChanged(RecyclerView recyclerView, int newState);
-        void scrolled(RecyclerView recyclerView, int dx, int dy);
-    }
-
-    private OnScrolledListener scrolledListener;
-
-    public OnScrolledListener getScrolledListener() {
-        return scrolledListener;
-    }
-
-    public void setScrolledListener(OnScrolledListener scrolledListener) {
-        this.scrolledListener = scrolledListener;
+        setDescendantFocusability(FOCUS_BLOCK_DESCENDANTS);
     }
 
     private void init(Context context) {
-        mLoadingView = new BottomLoadingView(context);
-        this.setOnScrollListener(new OnScrollListener() {
+        setHorizontalScrollBarEnabled(false);
+        setVerticalScrollBarEnabled(false);
+        this.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (scrolledListener != null) {
-                    scrolledListener.scrollStateChanged(recyclerView, newState);
-                }
                 //往下滑动 && 没有正在加载 && 注册了listener && 滑动结束
                 if (isHasMore && isScrollingDown && !isLoadingMore && onLoadMoreListener != null && newState == SCROLL_STATE_IDLE) {
                     LayoutManager layoutManager = getLayoutManager();
@@ -88,9 +77,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
                     if (layoutManager.getChildCount() > 0
                             && layoutManager.getItemCount() >= layoutManager.getChildCount()
                             && lastVisibleItemPosition >= layoutManager.getItemCount()) {
-                        isLoadingMore = true;
-                        onLoadMoreListener.onLoadMore();
-                        mLoadingView.changeToLoadingStatus();
+                        onStart();
                     }
                 }
             }
@@ -98,11 +85,8 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (scrolledListener != null) {
-                    scrolledListener.scrolled(recyclerView, dx, dy);
-                }
                 //记录是否正在向下滑动
-                isScrollingDown = isReverseLayout ? dy < 0 : dy > 0;
+                isScrollingDown = isReserveLayout ? dy < 0 : dy > 0;
             }
         });
     }
@@ -131,6 +115,16 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
             }
         }
         return max;
+    }
+
+    @Override
+    public void setLayoutManager(LayoutManager layout) {
+        super.setLayoutManager(layout);
+        if (layout instanceof LinearLayoutManager) {
+            isReserveLayout = ((LinearLayoutManager) layout).getReverseLayout();
+        } else if (layout instanceof StaggeredGridLayoutManager) {
+            isReserveLayout = ((StaggeredGridLayoutManager) layout).getReverseLayout();
+        }
     }
 
     private AdapterDataObserver mObserver = new RecyclerView.AdapterDataObserver() {
@@ -172,27 +166,29 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     public void setAdapter(Adapter adapter) {
         if (mOriginAdapter != null) {
             mOriginAdapter.unregisterAdapterDataObserver(mObserver);
+            mOriginAdapter.onDetachedFromRecyclerView(this);
         }
         mWrapAdapter = new WrapAdapter(adapter);
         super.setAdapter(mWrapAdapter);
         adapter.registerAdapterDataObserver(mObserver);
         mOriginAdapter = adapter;
+        mOriginAdapter.onAttachedToRecyclerView(this);
         checkEmpty();
     }
 
     @Override
-    public void setLayoutManager(LayoutManager layout) {
-        super.setLayoutManager(layout);
-        if (layout instanceof LinearLayoutManager) {
-            isReverseLayout = ((LinearLayoutManager) layout).getReverseLayout();
-        } else if (layout instanceof StaggeredGridLayoutManager) {
-            isReverseLayout = ((StaggeredGridLayoutManager) layout).getReverseLayout();
+    public void onStart() {
+        if (onLoadMoreListener != null) {
+            isLoadingMore = true;
+            isLoadingFail = false;
+            onLoadMoreListener.onLoadMore();
         }
     }
 
     @Override
     public void onSuccess(boolean hasMore) {
         isLoadingMore = false;
+        isLoadingFail = false;
         isHasMore = hasMore;
         if (mWrapAdapter != null) {
             mWrapAdapter.notifyDataSetChanged();
@@ -202,6 +198,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     @Override
     public void onFailure() {
         isLoadingMore = false;
+        isLoadingFail = true;
         if (mWrapAdapter != null) {
             mWrapAdapter.notifyDataSetChanged();
         }
@@ -210,9 +207,6 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     @Override
     public void setIsHaveMore(boolean isHasMore) {
         this.isHasMore = isHasMore;
-        if (mWrapAdapter != null) {
-            mWrapAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override
@@ -221,9 +215,9 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
     }
 
     public Adapter getAutoLoadRecyclerViewAdapter(){
-        if (mWrapAdapter != null){
+        if (mWrapAdapter != null) {
             return mWrapAdapter.getAdapter();
-        }else {
+        } else {
             return null;
         }
     }
@@ -254,7 +248,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
             return mAdapter;
         }
 
-        public WrapAdapter(RecyclerView.Adapter adapter) {
+        WrapAdapter(RecyclerView.Adapter adapter) {
             this.mAdapter = adapter;
         }
 
@@ -269,7 +263,7 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
                 gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
-                        return (getItemViewType(position) == TYPE_FOOTER) ? gridManager.getSpanCount() : originSizeLookup.getSpanSize(position);
+                        return (getItemViewType(position) == TYPE_FOOTER || getItemViewType(position) == TYPE_HEADER)  ? gridManager.getSpanCount() : originSizeLookup.getSpanSize(position);
                     }
                 });
             }
@@ -282,24 +276,24 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if(lp != null
                     && lp instanceof StaggeredGridLayoutManager.LayoutParams
-                    &&  (isFooter( holder.getLayoutPosition())) ) {
+                    &&  (isFooter(holder.getLayoutPosition())) ) {
                 StaggeredGridLayoutManager.LayoutParams p = (StaggeredGridLayoutManager.LayoutParams) lp;
                 p.setFullSpan(true);
             }
         }
 
-        public boolean isFooter(int position) {
+        boolean isFooter(int position) {
             return position < getItemCount() && position >= getItemCount() - getFootersCount();
         }
 
-        public int getFootersCount() {
-            return mLoadingView != null && isHasMore ? 1 : 0;
+        int getFootersCount() {
+            return isHasMore ? 1 : 0;
         }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_FOOTER) {
-                return new FooterViewHolder(mLoadingView);
+                return new FooterViewHolder(new BottomLoadingView(parent.getContext()));
             }
             return mAdapter.onCreateViewHolder(parent, viewType);
         }
@@ -307,15 +301,17 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof FooterViewHolder) {
+                FooterViewHolder viewHolder = (FooterViewHolder) holder;
                 int childCount = getLayoutManager().getChildCount();
                 if (position <= childCount) {
                     //不充满的情况下
-                    if (isHasMore) {
-                        mLoadingView.changeToClickStatus(onLoadMoreListener);
-                    }
+                    viewHolder.mLoadingView.changeToClickStatus();
+                    isLoadingFail = true;
                 } else {
-                    if (isHasMore) {
-                        mLoadingView.changeToLoadingStatus();
+                    if (isLoadingFail) {
+                        viewHolder.mLoadingView.changeToClickStatus();
+                    } else {
+                        viewHolder.mLoadingView.changeToLoadingStatus();
                     }
                 }
             } else {
@@ -324,17 +320,38 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
         }
 
         @Override
+        public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+            if (holder instanceof FooterViewHolder) {
+                FooterViewHolder viewHolder = (FooterViewHolder) holder;
+                int childCount = getLayoutManager().getChildCount();
+                if (position <= childCount) {
+                    //不充满的情况下
+                    viewHolder.mLoadingView.changeToClickStatus();
+                    isLoadingFail = true;
+                } else {
+                    if (isLoadingFail) {
+                        viewHolder.mLoadingView.changeToClickStatus();
+                    } else {
+                        viewHolder.mLoadingView.changeToLoadingStatus();
+                    }
+                }
+            } else {
+                mAdapter.onBindViewHolder(holder, position, payloads);
+            }
+        }
+
+        @Override
         public int getItemCount() {
             if (mAdapter != null) {
-                return getFootersCount() + mAdapter.getItemCount();
+                return mAdapter.getItemCount() == 0 ? 0 : getFootersCount() + mAdapter.getItemCount();
             } else {
-                return getFootersCount();
+                return 0;
             }
         }
 
         @Override
         public int getItemViewType(int position) {
-            if(isFooter(position)){
+            if (isFooter(position)) {
                 return TYPE_FOOTER;
             }
             if (mAdapter != null) {
@@ -351,9 +368,39 @@ public class AutoLoadRecyclerView extends RecyclerView implements LoadMoreInterf
             return -1;
         }
 
-        private class FooterViewHolder extends RecyclerView.ViewHolder {
-            public FooterViewHolder(View itemView) {
+        @Override
+        public void onViewRecycled(ViewHolder holder) {
+            super.onViewRecycled(holder);
+            if (mAdapter != null && !(holder instanceof FooterViewHolder)) {
+                mAdapter.onViewRecycled(holder);
+            }
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(ViewHolder holder) {
+            super.onViewDetachedFromWindow(holder);
+            if (mAdapter != null && !(holder instanceof FooterViewHolder)) {
+                mAdapter.onViewDetachedFromWindow(holder);
+            }
+        }
+
+        private class FooterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
+
+            private BottomLoadingView mLoadingView;
+
+            FooterViewHolder(View itemView) {
                 super(itemView);
+                mLoadingView = (BottomLoadingView) itemView;
+                mLoadingView.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                if (!isLoadingFail) {
+                    return;
+                }
+                mLoadingView.changeToLoadingStatus();
+                onStart();
             }
         }
     }

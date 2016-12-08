@@ -10,6 +10,9 @@ public class LoadMoreInterface {
     }
 
     public interface AutoLoadView {
+
+        void onStart();
+
         void onSuccess(boolean hasMore);
 
         void onFailure();
